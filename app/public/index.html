@@ -9,11 +9,12 @@
         <div class="container my-5">
             <div class="row justify-content-center">
                 <div class="col-md-6">
-
+                    <p>Allow duplicates: <span id="allow-dupes">false</span></p>
                     <div class="input-group mb-5">
                         <div class="input-group-prepend">
                             <div class="input-group-text">
-                                <input type="checkbox" aria-label="Checkbox for following text input">
+                                <input type="checkbox" aria-label="Checkbox for following text input" id="dupes">
+                                <small class="ml-2">dupes</small>
                             </div>
                         </div>
                         <input type="text" class="form-control" aria-label="Text input with checkbox" id="search-input">
@@ -29,11 +30,15 @@
         <script>
             let input = document.getElementById('search-input')
             let div = document.getElementById('names')
+            let dupes = document.getElementById('dupes')
+            let allowDupes = document.getElementById('allow-dupes')
+
+            allowDupes.style.color = allowDupes.checked === true ? 'green' : 'red'
 
             input.addEventListener('keyup', (event)=> {
-                div.innerHTML = ""
                 let terms = event.target.value
-                axios.get(`http://localhost:8080/search?terms=${ terms }&dupes=${ false }`).then((result)=> {
+                axios.get(`http://localhost:8080/search?terms=${ terms }&dupes=${ dupes.checked }`).then((result)=> {
+                    
                     let div = document.getElementById('names')
                     let output = ''
 
@@ -45,6 +50,24 @@
                     console.error(error)
                 })
 
+            })
+
+            dupes.addEventListener('change', (event)=> {
+                let terms = input.value
+                allowDupes.innerText = event.target.checked === true ? 'true' : 'false'
+                allowDupes.style.color = event.target.checked === true ? 'green' : 'red'
+
+                axios.get(`http://localhost:8080/search?terms=${ terms }&dupes=${ event.target.checked }`).then((result)=> {
+                    let div = document.getElementById('names')
+                    let output = ''
+
+                    result.data.forEach((name)=> {
+                        output += `<p>${ name }</p>`
+                    })
+                    div.innerHTML = output
+                }).catch((error)=> {
+                    console.error(error)
+                })
             })
         </script>
     </body>

@@ -28,6 +28,11 @@ class NameCollection
         return false;
     }
 
+    public function removeDupes()
+    {
+        $this->names = array_unique($this->names);
+    }
+
     public function sort()
     {
         usort($this->names, function(Name $a, Name $b) {

@@ -35,9 +35,16 @@ $app->get('/search', function(Request $request, Response $response, $args) {
     $body = $response->getBody();
 
     $results = [];
-    if(isset($_GET['terms']))
+    if(isset($_GET['terms']) && $_GET['terms'] !== "" && $_GET['terms'] !== " ")
     {
         $terms = $_GET['terms'];
+
+        if(isset($_GET['dupes']) && $_GET['dupes'] === 'true')
+        {
+            $dupes = true;
+        } else {
+            $dupes = false;
+        }
 
         $context = new Context("db", "admin", "pass");
         $nameRepository = new NameRepository($context);
@@ -46,8 +53,8 @@ $app->get('/search', function(Request $request, Response $response, $args) {
         $searchRepository = new SearchRepository($redis);
 
         $service = new SearchService($nameRepository, $searchRepository, new SearchResponse());
-
-        $results = $service->execute($terms);
+        
+        $results = $service->execute($terms, $dupes);
     }
 
     $body->write(json_encode($results));

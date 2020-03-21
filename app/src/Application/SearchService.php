@@ -21,28 +21,26 @@ class SearchService
         $this->response = $response;
     }
 
-    public function execute(String $terms)
+    public function execute(String $terms, $dupes = false)
     {
-        $cached = $this->searchRepo->search($terms);
-        if(count($cached) > 0)
-        {
-            var_dump($cached);
-            // die();
-            return $cached;
-        }
-
-        $collection = $this->nameRepo->findByName($terms);
-
+        $collection = $this->searchRepo->search($terms);
         if($collection->isNotEmpty() === false)
         {
-            return [];
+            $collection = $this->nameRepo->findByName($terms);
+            if($collection->isNotEmpty() === false)
+            {
+                return [];
+            }
+
+            $collection->sort();
+            $this->searchRepo->save($terms, $collection);
         }
 
-        $collection->sort();
+        if($dupes === false)
+        {
+            $collection->removeDupes();
+        }
 
-        $names = $this->response->format($collection);
-        $this->searchRepo->save($terms, $names);
-
-        return $names;
+        return $this->response->format($collection);
     }
 }
