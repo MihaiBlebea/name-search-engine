@@ -1,0 +1,11 @@
+FROM php:7-fpm
+
+WORKDIR /app
+
+RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+
+RUN docker-php-ext-install mysqli pdo pdo_mysql
+
+COPY ./../app .
+
+ENTRYPOINT [ "composer", "seed" ]

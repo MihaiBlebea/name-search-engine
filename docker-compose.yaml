@@ -1,0 +1,62 @@
+version: "3"
+
+services:
+    app: 
+        build:
+            context: ./app
+            dockerfile: Dockerfile.server
+        container_name: app
+        volumes:
+            - ./app:/app
+        networks:
+            - app
+        depends_on:
+            - db
+            - redis
+            - seeder
+        restart: on-failure
+    nginx:
+        build: ./nginx
+        container_name: nginx
+        ports:
+            - 8080:80
+        volumes:
+            - ./app:/app
+        networks:
+            - app
+        depends_on:
+            - app
+        restart: on-failure
+    db:
+        image: mariadb:latest
+        container_name: db
+        environment: 
+            - MYSQL_ROOT_PASSWORD=root
+            - MYSQL_DATABASE=db
+            - MYSQL_USER=admin
+            - MYSQL_PASSWORD=pass
+        ports:
+            - 3306:3306
+        networks:
+            - app
+    redis:
+        image: redis:latest
+        container_name: redis
+        ports:
+            - 6379:6379
+        networks:
+            - app
+    seeder:
+        build: 
+            context: ./app
+            dockerfile: Dockerfile.seed
+        container_name: seeder
+        networks: 
+            - app
+        depends_on:
+            - db
+        restart: on-failure
+
+networks:
+    app:
+        driver: bridge
