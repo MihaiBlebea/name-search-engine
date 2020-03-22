@@ -3,10 +3,10 @@
 ## How to run locally?
 
 First of all let's talk about requirements (yes, then are some basic ones :) 
-    - [ ] Have `composer` installed locally. We are not going to run composer in docker, are we? Of course not.
-    - [ ] Have `docker` installed... 
-    - [ ] Have port `8080` clear on the host
-    - [ ] Run this on a Mac for maximum effect
+- [ ] Have `composer` installed locally. We are not going to run composer in docker, are we? Of course not.
+- [ ] Have `docker` installed... 
+- [ ] Have port `8080` clear on the host
+- [ ] Run this on a Mac for maximum effect
 
 Now if all the above are checked (hope I didn't miss anything lol), then just navigate to the root folder of this project and run:
  - `bash up.sh`
