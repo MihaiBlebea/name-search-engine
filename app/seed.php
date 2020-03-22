@@ -1,9 +1,9 @@
 <?php 
 
-require __DIR__ . '/vendor/autoload.php';
+require_once __DIR__ . '/vendor/autoload.php';
+require_once __DIR__ . '/bootstrap/boot.php';
 
 use App\Infrastructure\Mysql\Context;
-use App\Infrastructure\Mysql\NameRepository;
 
 
 if(!function_exists('fetchCsvData')) 
@@ -38,10 +38,8 @@ if(!function_exists('createNamesTable'))
 
 $data = fetchCsvData();
 
-$context = new Context("db", "admin", "pass");
+createNamesTable($container->get('MysqlContext'));
 
-createNamesTable($context);
-
-$repository = new NameRepository($context);
+$repository = $container->get('NameRepository');
 
 $repository->seed($data);

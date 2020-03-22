@@ -1,15 +1,16 @@
-version: "3"
+version: "3.7"
 
 services:
     app: 
         build:
             context: ./app
-            dockerfile: Dockerfile.server
+            dockerfile: Dockerfile
+        image: serbanblebea/name-search-engine-app:latest
         container_name: app
         volumes:
             - ./app:/app
         networks:
-            - app
+            - app-network
         depends_on:
             - db
             - redis
@@ -17,16 +18,23 @@ services:
         restart: on-failure
     nginx:
         build: ./nginx
+        image: serbanblebea/name-search-engine-nginx:latest
         container_name: nginx
         ports:
             - 8080:80
         volumes:
             - ./app:/app
         networks:
-            - app
+            - app-network
         depends_on:
             - app
         restart: on-failure
+        healthcheck:
+            test: ["CMD", "curl", "-f", "http://localhost:80/healthcheck"]
+            interval: 2m30s
+            timeout: 10s
+            retries: 3
+            start_period: 20s
     db:
         image: mariadb:latest
         container_name: db
@@ -38,25 +46,27 @@ services:
         ports:
             - 3306:3306
         networks:
-            - app
+            - app-network
     redis:
         image: redis:latest
         container_name: redis
         ports:
             - 6379:6379
         networks:
-            - app
+            - app-network
     seeder:
         build: 
             context: ./app
-            dockerfile: Dockerfile.seed
+            dockerfile: Dockerfile
+        image: serbanblebea/name-search-engine-app:latest
+        entrypoint: php seed.php
         container_name: seeder
         networks: 
-            - app
+            - app-network
         depends_on:
             - db
         restart: on-failure
 
 networks:
-    app:
+    app-network:
         driver: bridge

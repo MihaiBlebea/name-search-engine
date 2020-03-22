@@ -1,6 +1,6 @@
 <html>
     <head>
-        <title>Names</title>
+        <title>Name Search Engine</title>
         <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
 
         <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
@@ -27,48 +27,5 @@
         </div>
 
         <script src="./script.js"></script>
-        <script>
-            let input = document.getElementById('search-input')
-            let div = document.getElementById('names')
-            let dupes = document.getElementById('dupes')
-            let allowDupes = document.getElementById('allow-dupes')
-
-            allowDupes.style.color = allowDupes.checked === true ? 'green' : 'red'
-
-            input.addEventListener('keyup', (event)=> {
-                let terms = event.target.value
-                axios.get(`http://localhost:8080/search?terms=${ terms }&dupes=${ dupes.checked }`).then((result)=> {
-                    
-                    let div = document.getElementById('names')
-                    let output = ''
-
-                    result.data.forEach((name)=> {
-                        output += `<p>${ name }</p>`
-                    })
-                    div.innerHTML = output
-                }).catch((error)=> {
-                    console.error(error)
-                })
-
-            })
-
-            dupes.addEventListener('change', (event)=> {
-                let terms = input.value
-                allowDupes.innerText = event.target.checked === true ? 'true' : 'false'
-                allowDupes.style.color = event.target.checked === true ? 'green' : 'red'
-
-                axios.get(`http://localhost:8080/search?terms=${ terms }&dupes=${ event.target.checked }`).then((result)=> {
-                    let div = document.getElementById('names')
-                    let output = ''
-
-                    result.data.forEach((name)=> {
-                        output += `<p>${ name }</p>`
-                    })
-                    div.innerHTML = output
-                }).catch((error)=> {
-                    console.error(error)
-                })
-            })
-        </script>
     </body>
 </html>

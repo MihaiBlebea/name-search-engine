@@ -3,18 +3,21 @@ use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Slim\Factory\AppFactory;
 
-use App\Application\SearchService;
-use App\Application\SearchResponse;
-use App\Infrastructure\Mysql\Context;
-use App\Infrastructure\Mysql\NameRepository;
-use App\Infrastructure\Redis\Context as RedisContext;
-use App\Infrastructure\Redis\SearchRepository;
-
-
-require __DIR__ . '/../vendor/autoload.php';
+require_once __DIR__ . '/../vendor/autoload.php';
+require_once __DIR__ . '/../bootstrap/boot.php';
 
 $app = AppFactory::create();
 
+
+$app->get('/healthcheck', function (Request $request, Response $response, $args) {
+    $response->withHeader('Content-type', 'application/json');
+    $body = $response->getBody();
+
+    $body->write(json_encode([
+        "status" => "OK"
+    ]));
+    return $response;
+});
 
 $app->get('/', function (Request $request, Response $response, $args) {
     $file = 'index.html';
@@ -29,7 +32,7 @@ $app->get('/', function (Request $request, Response $response, $args) {
     }
 });
 
-$app->get('/search', function(Request $request, Response $response, $args) {
+$app->get('/search', function(Request $request, Response $response, $args) use ($container) {
     
     $response->withHeader('Content-type', 'application/json');
     $body = $response->getBody();
@@ -38,22 +41,9 @@ $app->get('/search', function(Request $request, Response $response, $args) {
     if(isset($_GET['terms']) && $_GET['terms'] !== "" && $_GET['terms'] !== " ")
     {
         $terms = $_GET['terms'];
+        $dupes = isset($_GET['dupes']) && $_GET['dupes'] === 'true' ? true : false;
 
-        if(isset($_GET['dupes']) && $_GET['dupes'] === 'true')
-        {
-            $dupes = true;
-        } else {
-            $dupes = false;
-        }
-
-        $context = new Context("db", "admin", "pass");
-        $nameRepository = new NameRepository($context);
-
-        $redis = new RedisContext('redis');
-        $searchRepository = new SearchRepository($redis);
-
-        $service = new SearchService($nameRepository, $searchRepository, new SearchResponse());
-        
+        $service = $container->get('SearchService');
         $results = $service->execute($terms, $dupes);
     }
 
